@@ -35,7 +35,7 @@ jobs:
           choco install -y googlechrome vscode 7zip rclone
 
       - name: Setup Rclone and Download
-        if: secrets.RCLONE_SA_JSON
+        if: ${{ secrets.RCLONE_SA_JSON != '' }}
         env:
           RCLONE_SA_JSON: ${{ secrets.RCLONE_SA_JSON }}
         run: |
@@ -76,7 +76,7 @@ jobs:
           }
 
       - name: Upload Files to Cloud
-        if: always() && secrets.RCLONE_SA_JSON
+        if: always() && secrets.RCLONE_SA_JSON != ''
         env:
           RCLONE_SA_JSON: ${{ secrets.RCLONE_SA_JSON }}
         run: |
