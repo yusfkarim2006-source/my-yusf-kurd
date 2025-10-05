@@ -1,4 +1,4 @@
-name: The Real Final RDP (v20 - Alternative Syntax)
+name: The Real Final RDP (v21 - Fixed Parsing)
 on:
   workflow_dispatch:
 
@@ -37,10 +37,13 @@ jobs:
       - name: Check if Rclone Secret Exists
         id: check_secret
         run: |
-          if ("${{ secrets.RCLONE_SA_JSON }}" -ne "") {
+          $secretValue = "${{ secrets.RCLONE_SA_JSON }}"
+          if ($secretValue.Length -gt 0) {
             echo "secret_exists=true" >> $env:GITHUB_OUTPUT
+            Write-Host "Secret found"
           } else {
             echo "secret_exists=false" >> $env:GITHUB_OUTPUT
+            Write-Host "No secret found"
           }
 
       - name: Setup Rclone and Download
