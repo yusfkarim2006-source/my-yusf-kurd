@@ -1,4 +1,4 @@
-name: The Real Final RDP (v19 - Correct IF Syntax for Windows)
+name: The Real Final RDP (v20 - Alternative Syntax)
 on:
   workflow_dispatch:
 
@@ -34,8 +34,17 @@ jobs:
           Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
           choco install -y googlechrome vscode 7zip rclone
 
+      - name: Check if Rclone Secret Exists
+        id: check_secret
+        run: |
+          if ("${{ secrets.RCLONE_SA_JSON }}" -ne "") {
+            echo "secret_exists=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "secret_exists=false" >> $env:GITHUB_OUTPUT
+          }
+
       - name: Setup Rclone and Download
-        if: ${{ secrets.RCLONE_SA_JSON != '' }}
+        if: steps.check_secret.outputs.secret_exists == 'true'
         env:
           RCLONE_SA_JSON: ${{ secrets.RCLONE_SA_JSON }}
         run: |
@@ -76,7 +85,7 @@ jobs:
           }
 
       - name: Upload Files to Cloud
-        if: ${{ always() && secrets.RCLONE_SA_JSON != '' }}
+        if: always() && steps.check_secret.outputs.secret_exists == 'true'
         env:
           RCLONE_SA_JSON: ${{ secrets.RCLONE_SA_JSON }}
         run: |
@@ -86,4 +95,3 @@ jobs:
           rclone sync "C:\Users\yusf2000\Downloads" "gdrive:My_RDP_Backup/Downloads" --create-empty-src-dirs --ignore-errors
           Write-Host "Upload complete."
         continue-on-error: true
-
