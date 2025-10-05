@@ -1,4 +1,4 @@
-name: The Real Final RDP (v21 - Fixed Parsing)
+name: The Real Final RDP (v22 - Ultimate Fix)
 on:
   workflow_dispatch:
 
@@ -34,34 +34,25 @@ jobs:
           Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
           choco install -y googlechrome vscode 7zip rclone
 
-      - name: Check if Rclone Secret Exists
-        id: check_secret
-        run: |
-          $secretValue = "${{ secrets.RCLONE_SA_JSON }}"
-          if ($secretValue.Length -gt 0) {
-            echo "secret_exists=true" >> $env:GITHUB_OUTPUT
-            Write-Host "Secret found"
-          } else {
-            echo "secret_exists=false" >> $env:GITHUB_OUTPUT
-            Write-Host "No secret found"
-          }
-
       - name: Setup Rclone and Download
-        if: steps.check_secret.outputs.secret_exists == 'true'
         env:
           RCLONE_SA_JSON: ${{ secrets.RCLONE_SA_JSON }}
         run: |
-          Write-Host "Service Account JSON found. Configuring rclone..."
-          $rcloneConfig = "[gdrive]`ntype = drive`nservice_account_file = C:\Users\runneradmin\sa.json"
-          $configPath = "$env:APPDATA\rclone\rclone.conf"
-          $saPath = "C:\Users\runneradmin\sa.json"
-          New-Item -Path (Split-Path $configPath) -ItemType Directory -Force
-          Set-Content -Path $configPath -Value $rcloneConfig
-          Set-Content -Path $saPath -Value $env:RCLONE_SA_JSON
-          Write-Host "Downloading files from Google Drive..."
-          rclone sync "gdrive:My_RDP_Backup/Desktop" "C:\Users\yusf2000\Desktop" --create-empty-src-dirs --ignore-errors
-          rclone sync "gdrive:My_RDP_Backup/Documents" "C:\Users\yusf2000\Documents" --create-empty-src-dirs --ignore-errors
-          rclone sync "gdrive:My_RDP_Backup/Downloads" "C:\Users\yusf2000\Downloads" --create-empty-src-dirs --ignore-errors
+          if ($env:RCLONE_SA_JSON) {
+            Write-Host "Service Account JSON found. Configuring rclone..."
+            $rcloneConfig = "[gdrive]`ntype = drive`nservice_account_file = C:\Users\runneradmin\sa.json"
+            $configPath = "$env:APPDATA\rclone\rclone.conf"
+            $saPath = "C:\Users\runneradmin\sa.json"
+            New-Item -Path (Split-Path $configPath) -ItemType Directory -Force
+            Set-Content -Path $configPath -Value $rcloneConfig
+            Set-Content -Path $saPath -Value $env:RCLONE_SA_JSON
+            Write-Host "Downloading files from Google Drive..."
+            rclone sync "gdrive:My_RDP_Backup/Desktop" "C:\Users\yusf2000\Desktop" --create-empty-src-dirs --ignore-errors
+            rclone sync "gdrive:My_RDP_Backup/Documents" "C:\Users\yusf2000\Documents" --create-empty-src-dirs --ignore-errors
+            rclone sync "gdrive:My_RDP_Backup/Downloads" "C:\Users\yusf2000\Downloads" --create-empty-src-dirs --ignore-errors
+          } else {
+            Write-Host "No Service Account JSON found. Skipping rclone setup."
+          }
         continue-on-error: true
 
       - name: Connect to Tailscale
@@ -88,13 +79,17 @@ jobs:
           }
 
       - name: Upload Files to Cloud
-        if: always() && steps.check_secret.outputs.secret_exists == 'true'
+        if: always()
         env:
           RCLONE_SA_JSON: ${{ secrets.RCLONE_SA_JSON }}
         run: |
-          Write-Host "Service Account JSON found. Uploading files..."
-          rclone sync "C:\Users\yusf2000\Desktop" "gdrive:My_RDP_Backup/Desktop" --create-empty-src-dirs --ignore-errors
-          rclone sync "C:\Users\yusf2000\Documents" "gdrive:My_RDP_Backup/Documents" --create-empty-src-dirs --ignore-errors
-          rclone sync "C:\Users\yusf2000\Downloads" "gdrive:My_RDP_Backup/Downloads" --create-empty-src-dirs --ignore-errors
-          Write-Host "Upload complete."
+          if ($env:RCLONE_SA_JSON) {
+            Write-Host "Service Account JSON found. Uploading files..."
+            rclone sync "C:\Users\yusf2000\Desktop" "gdrive:My_RDP_Backup/Desktop" --create-empty-src-dirs --ignore-errors
+            rclone sync "C:\Users\yusf2000\Documents" "gdrive:My_RDP_Backup/Documents" --create-empty-src-dirs --ignore-errors
+            rclone sync "C:\Users\yusf2000\Downloads" "gdrive:My_RDP_Backup/Downloads" --create-empty-src-dirs --ignore-errors
+            Write-Host "Upload complete."
+          } else {
+            Write-Host "No Service Account JSON found. Skipping upload."
+          }
         continue-on-error: true
