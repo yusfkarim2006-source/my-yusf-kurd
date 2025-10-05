@@ -1,4 +1,4 @@
-name: The Final RDP (v16 - Indentation Fix)
+name: The Real Final RDP (v17 - Tested)
 on:
   workflow_dispatch:
 
@@ -40,17 +40,12 @@ jobs:
           RCLONE_SA_JSON: ${{ secrets.RCLONE_SA_JSON }}
         run: |
           Write-Host "Service Account JSON found. Configuring rclone..."
-          $rcloneConfig = @"
-[gdrive]
-type = drive
-service_account_file = C:\Users\runneradmin\sa.json
-"@
+          $rcloneConfig = "[gdrive]`ntype = drive`nservice_account_file = C:\Users\runneradmin\sa.json"
           $configPath = "$env:APPDATA\rclone\rclone.conf"
           $saPath = "C:\Users\runneradmin\sa.json"
           New-Item -Path (Split-Path $configPath) -ItemType Directory -Force
           Set-Content -Path $configPath -Value $rcloneConfig
           Set-Content -Path $saPath -Value $env:RCLONE_SA_JSON
-
           Write-Host "Downloading files from Google Drive..."
           rclone sync "gdrive:My_RDP_Backup/Desktop" "C:\Users\yusf2000\Desktop" --create-empty-src-dirs --ignore-errors
           rclone sync "gdrive:My_RDP_Backup/Documents" "C:\Users\yusf2000\Documents" --create-empty-src-dirs --ignore-errors
