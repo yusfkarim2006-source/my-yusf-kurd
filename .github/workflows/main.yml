@@ -71,12 +71,13 @@ jobs:
           Write-Host "Password:    ${{ env.RDP_PASS }}"
           Write-Host "========================================="
           
-      - name: Keep Alive
+      - name: Wait for Upload Time
         run: |
-          while ($true) {
-            Write-Host "[$(Get-Date)] Session is active."
-            Start-Sleep -Seconds 60
-          }
+          $totalTimeoutMinutes = 360 # وەرگیراوە لە timeout-minutes ی jobەکە
+          $uploadBufferMinutes = 30 # 30 خولەک پێش کۆتاییهاتن
+          $sleepMinutes = $totalTimeoutMinutes - $uploadBufferMinutes
+          Write-Host "Waiting for $($sleepMinutes) minutes before starting upload..."
+          Start-Sleep -Seconds ($sleepMinutes * 60)
 
       - name: Check Files Before Upload
         run: |
@@ -105,4 +106,3 @@ jobs:
             Write-Host "No Service Account JSON found. Skipping upload."
           }
         continue-on-error: true
-
