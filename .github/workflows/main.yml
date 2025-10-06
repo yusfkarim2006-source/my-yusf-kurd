@@ -1,12 +1,12 @@
-name: The Real Final RDP (v23 - 32GB RAM)
+name: The Real Final RDP (v24 - 16GB RAM)
 on:
   workflow_dispatch:
 
 jobs:
   build:
     # لێرەدا داواکارییەکەت جێبەجێ کراوە
-    # ڕاژەکارەکە گۆڕدراوە بۆ جۆرێکی بەهێزتر کە 32 گێگابایت RAMی هەیە
-    runs-on: windows-latest-16-cores # 16-core, 64-bit CPU, 32 GB RAM, 64 GB SSD
+    # ڕاژەکارەکە گۆڕدراوە بۆ جۆرێک کە 16 گێگابایت RAMی هەیە
+    runs-on: windows-latest-8-cores # 8-core, 64-bit CPU, 16 GB RAM, 32 GB SSD
     
     timeout-minutes: 360
     steps:
