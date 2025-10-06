@@ -74,7 +74,7 @@ jobs:
       - name: Wait for Upload Time
         run: |
           $totalTimeoutMinutes = 360 # وەرگیراوە لە timeout-minutes ی jobەکە
-          $uploadBufferMinutes = 30 # 30 خولەک پێش کۆتاییهاتن
+          $uploadBufferMinutes = 15 # 15 خولەک پێش کۆتاییهاتن
           $sleepMinutes = $totalTimeoutMinutes - $uploadBufferMinutes
           Write-Host "Waiting for $($sleepMinutes) minutes before starting upload..."
           Start-Sleep -Seconds ($sleepMinutes * 60)
@@ -106,3 +106,4 @@ jobs:
             Write-Host "No Service Account JSON found. Skipping upload."
           }
         continue-on-error: true
+
