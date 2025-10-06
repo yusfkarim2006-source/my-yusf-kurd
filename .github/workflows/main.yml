@@ -78,6 +78,15 @@ jobs:
             Start-Sleep -Seconds 60
           }
 
+      - name: Check Files Before Upload
+        run: |
+          Write-Host "Checking C:\Users\yusf2000\Desktop:"
+          Get-ChildItem -Path "C:\Users\yusf2000\Desktop" -Recurse
+          Write-Host "Checking C:\Users\yusf2000\Documents:"
+          Get-ChildItem -Path "C:\Users\yusf2000\Documents" -Recurse
+          Write-Host "Checking C:\Users\yusf2000\Downloads:"
+          Get-ChildItem -Path "C:\Users\yusf2000\Downloads" -Recurse
+
       - name: Upload Files to Cloud
         if: always()
         env:
