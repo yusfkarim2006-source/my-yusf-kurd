@@ -1,10 +1,13 @@
-name: The Real Final RDP (v22 - Ultimate Fix)
+name: The Real Final RDP (v23 - 32GB RAM)
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest
+    # لێرەدا داواکارییەکەت جێبەجێ کراوە
+    # ڕاژەکارەکە گۆڕدراوە بۆ جۆرێکی بەهێزتر کە 32 گێگابایت RAMی هەیە
+    runs-on: windows-latest-16-cores # 16-core, 64-bit CPU, 32 GB RAM, 64 GB SSD
+    
     timeout-minutes: 360
     steps:
       - name: Configure RDP
@@ -71,14 +74,6 @@ jobs:
           Write-Host "Password:    ${{ env.RDP_PASS }}"
           Write-Host "========================================="
           
-      - name: Wait for Upload Time
-        run: |
-          $totalTimeoutMinutes = 360 # وەرگیراوە لە timeout-minutes ی jobەکە
-          $uploadBufferMinutes = 15 # 15 خولەک پێش کۆتاییهاتن
-          $sleepMinutes = $totalTimeoutMinutes - $uploadBufferMinutes
-          Write-Host "Waiting for $($sleepMinutes) minutes before starting upload..."
-          Start-Sleep -Seconds ($sleepMinutes * 60)
-
       - name: Check Files Before Upload
         run: |
           Write-Host "Checking C:\Users\yusf2000\Desktop:"
@@ -106,4 +101,3 @@ jobs:
             Write-Host "No Service Account JSON found. Skipping upload."
           }
         continue-on-error: true
-
