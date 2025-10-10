@@ -1,11 +1,11 @@
-name: The Real Final RDP (v22 - Ultimate Fix with 10-Hour Keep-Alive)
+name: The Real Final RDP (v22 - Ultimate Fix)
 on:
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 600 # زیادکرا بۆ 10 کاتژمێر
+    timeout-minutes: 360
     steps:
       - name: Configure RDP
         run: |
@@ -69,22 +69,14 @@ jobs:
           Write-Host "RDP Address: ${{ env.TAILSCALE_IP }}"
           Write-Host "Username:    ${{ env.RDP_USER }}"
           Write-Host "Password:    ${{ env.RDP_PASS }}"
-          Write-Host "========================================="
+          Write-Host "========================================"
           
-      - name: Keep Session Alive
+      - name: Keep Alive
         run: |
-          Write-Host "Session is now active. It will remain open for approximately 10 hours."
-          Write-Host "Press Ctrl+C in the log window to cancel the workflow earlier if needed."
-          Start-Sleep -Seconds 35700 # نزیکەی 10 کاتژمێر
-
-      - name: Check Files Before Upload
-        run: |
-          Write-Host "Checking C:\Users\yusf2000\Desktop:"
-          Get-ChildItem -Path "C:\Users\yusf2000\Desktop" -Recurse
-          Write-Host "Checking C:\Users\yusf2000\Documents:"
-          Get-ChildItem -Path "C:\Users\yusf2000\Documents" -Recurse
-          Write-Host "Checking C:\Users\yusf2000\Downloads:"
-          Get-ChildItem -Path "C:\Users\yusf2000\Downloads" -Recurse
+          while ($true) {
+            Write-Host "[$(Get-Date)] Session is active."
+            Start-Sleep -Seconds 60
+          }
 
       - name: Upload Files to Cloud
         if: always()
@@ -93,13 +85,10 @@ jobs:
         run: |
           if ($env:RCLONE_SA_JSON) {
             Write-Host "Service Account JSON found. Uploading files..."
-            rclone sync "C:\Users\yusf2000\Desktop" "gdrive:My_RDP_Backup/Desktop" --create-empty-src-dirs --ignore-errors --verbose --log-file rclone_upload.log
-            rclone sync "C:\Users\yusf2000\Documents" "gdrive:My_RDP_Backup/Documents" --create-empty-src-dirs --ignore-errors --verbose --log-file rclone_upload.log
-            rclone sync "C:\Users\yusf2000\Downloads" "gdrive:My_RDP_Backup/Downloads" --create-empty-src-dirs --ignore-errors --verbose --log-file rclone_upload.log
+            rclone sync "C:\Users\yusf2000\Desktop" "gdrive:My_RDP_Backup/Desktop" --create-empty-src-dirs --ignore-errors
+            rclone sync "C:\Users\yusf2000\Documents" "gdrive:My_RDP_Backup/Documents" --create-empty-src-dirs --ignore-errors
+            rclone sync "C:\Users\yusf2000\Downloads" "gdrive:My_RDP_Backup/Downloads" --create-empty-src-dirs --ignore-errors
             Write-Host "Upload complete."
-            Write-Host "--- Rclone Log Content ---"
-            Get-Content rclone_upload.log
-            Write-Host "--------------------------"
           } else {
             Write-Host "No Service Account JSON found. Skipping upload."
           }
